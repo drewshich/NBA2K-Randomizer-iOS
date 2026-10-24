@@ -1,0 +1,13 @@
+android-reference/
+ios/*.xcodeproj/
+ios/.build/
+build/
+.DS_Store
+*.ipa
+*.xcarchive
+*.xcresult
+__pycache__/
+.tools/
+.env
+.env.*
+ios/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon.png

@@ -1,0 +1,81 @@
+name: Build personal iPhone app
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: personal-iphone-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check bundled data
+        run: python3 tools/validate_data.py
+      - name: Prepare app icon
+        run: python3 tools/prepare_assets.py
+      - name: Generate Xcode project
+        run: |
+          if ! command -v xcodegen >/dev/null; then brew install xcodegen; fi
+          xcodegen generate --spec ios/project.yml
+          xcodebuild -version
+      - name: Choose iPhone simulator
+        id: simulator
+        run: python3 tools/select_simulator.py >> "$GITHUB_OUTPUT"
+      - name: Run unit tests and iPhone smoke test
+        run: |
+          set -o pipefail
+          mkdir -p build
+          xcodebuild test \
+            -project ios/NBA2KRandomizer.xcodeproj \
+            -scheme NBA2KRandomizer \
+            -destination 'platform=iOS Simulator,id=${{ steps.simulator.outputs.id }}' \
+            -derivedDataPath build/DerivedData \
+            -resultBundlePath build/Tests.xcresult \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+            | tee build/test.log
+      - name: Export simulator screenshots
+        if: always()
+        run: |
+          if [ -d build/Tests.xcresult ]; then
+            xcrun xcresulttool export attachments --path build/Tests.xcresult --output-path build/screenshots
+          fi
+      - name: Build unsigned iPhone app
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project ios/NBA2KRandomizer.xcodeproj \
+            -scheme NBA2KRandomizer \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/DerivedData \
+            -archivePath build/NBA2KRandomizer.xcarchive \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+            | tee build/archive.log
+          mkdir -p build/ipa/Payload
+          cp -R build/NBA2KRandomizer.xcarchive/Products/Applications/NBA2KRandomizer.app build/ipa/Payload/
+          cd build/ipa
+          zip -qry ../NBA2K-Randomizer-Personal.ipa Payload
+      - name: Save personal IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: NBA2K-Randomizer-Personal
+          path: build/NBA2K-Randomizer-Personal.ipa
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - name: Save screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iPhone-checks
+          path: |
+            build/screenshots
+            build/*.log
+          retention-days: 7

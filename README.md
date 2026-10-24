@@ -25,8 +25,8 @@
 
 Для установки используется **[iLoader](https://iloader.app/)**.
 
-1. Установить **iTunes для Windows** по ссылке в разделе Windows на [официальном сайте iLoader](https://iloader.app/). Он нужен для связи компьютера с iPhone.
-2. Скачать и установить **iLoader для Windows** с того же сайта или из [официальных выпусков на GitHub](https://github.com/nab138/iloader/releases).
+1. Скачать и установить **[iTunes для Windows (64 бит) с сайта Apple](https://www.apple.com/itunes/download/win64)**. Он нужен для связи компьютера с iPhone.
+2. Скачать и установить **iLoader для Windows** с [официального сайта iLoader](https://iloader.app/) или из [официальных выпусков на GitHub](https://github.com/nab138/iloader/releases).
 3. Подключить разблокированный iPhone кабелем, подтвердить «Доверять этому компьютеру» и при запросе ввести код-пароль телефона.
 4. Открыть iLoader, выбрать подключённый iPhone и войти в свой **Apple Account**. Подтвердить вход кодом двухфакторной аутентификации, если он запрошен.
 5. Выбрать **Import IPA**, указать скачанный `NBA2K-Randomizer.ipa` и дождаться установки. Для первой установки оставить настройки iLoader по умолчанию.
